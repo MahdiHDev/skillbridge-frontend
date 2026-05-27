@@ -6,20 +6,14 @@ SkillBridge is a full-stack online tutoring marketplace where students can disco
 
 ## 🔗 Live URLs
 
-| Resource      | URL                                                    |
-| ------------- | ------------------------------------------------------ |
-| Frontend Live | `https://skillbridge-frontend.vercel.app`              |
-| Backend Live  | `https://skillbridge-backend.vercel.app`               |
-| Backend Repo  | `https://github.com/your-username/skillbridge-backend` |
+| Resource      | URL                                                     |
+| ------------- | ------------------------------------------------------  |
+| Frontend Live | `https://assignment-5-frontend-one.vercel.app/login`    |
+| Backend Live  | `https://assignment5-api.vercel.app/`                   |
+| Backend Repo  | `https://github.com/MahdiHDev/assignment-5`             |
+
 
 ---
-
-## 🎥 Demo Video
-
-> [Watch Demo on Google Drive](https://drive.google.com/file/d/your-video-id/view)
-
----
-
 ## 🛠️ Tech Stack
 
 | Technology              | Purpose             |
