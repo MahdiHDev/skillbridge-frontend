@@ -1,5 +1,6 @@
 "use client";
 
+import { loginAction } from "@/app/(commonLayout)/login/_action";
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -16,38 +17,41 @@ import {
     FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
+import { ILoginPayload, loginZodSchema } from "@/zod/auth.validation";
 import { useForm } from "@tanstack/react-form";
+import { useMutation } from "@tanstack/react-query";
+import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { toast } from "sonner";
-import * as z from "zod";
-
-const formSchema = z.object({
-    password: z.string().min(8, "Minimum length is 8 characters"),
-    email: z.email(),
-});
 
 export function LoginForm({
     className,
     ...props
 }: React.ComponentProps<"div">) {
     const router = useRouter();
+    const [showPassword, setShowPassword] = useState(false);
+
+    const { mutateAsync, isPending } = useMutation({
+        mutationFn: (payload: ILoginPayload) => loginAction(payload),
+    });
+
     const form = useForm({
         defaultValues: {
             email: "",
             password: "",
         },
         validators: {
-            onSubmit: formSchema,
+            onSubmit: loginZodSchema,
         },
         onSubmit: async ({ value }) => {
             const toastId = toast.loading("Logging in");
             try {
-                const { data, error } = await authClient.signIn.email(value);
+                const result = (await mutateAsync(value)) as any;
 
-                if (error) {
-                    toast.error(error.message, { id: toastId });
+                if (!result.success) {
+                    toast.error(result.message || "Login failed");
                     return;
                 }
 
@@ -55,11 +59,9 @@ export function LoginForm({
 
                 router.refresh();
                 router.push("/");
-            } catch (error) {
-                toast.error("Something went wrong, please try again.", {
-                    id: toastId,
-                });
-                console.error(error);
+            } catch (error: any) {
+                console.log(`Login failed: ${error.message}`);
+                toast.error(`Login failed: ${error.message}`);
             }
         },
     });
@@ -126,17 +128,44 @@ export function LoginForm({
                                             <FieldLabel htmlFor={field.name}>
                                                 Password
                                             </FieldLabel>
-                                            <Input
-                                                type="password"
-                                                id={field.name}
-                                                name={field.name}
-                                                value={field.state.value}
-                                                onChange={(e) =>
-                                                    field.handleChange(
-                                                        e.target.value,
-                                                    )
-                                                }
-                                            />
+                                            <div className="relative">
+                                                <Input
+                                                    type={
+                                                        showPassword
+                                                            ? "text"
+                                                            : "password"
+                                                    }
+                                                    id={field.name}
+                                                    name={field.name}
+                                                    value={field.state.value}
+                                                    className="pr-10"
+                                                    onChange={(e) =>
+                                                        field.handleChange(
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        setShowPassword(
+                                                            (prev) => !prev,
+                                                        )
+                                                    }
+                                                    aria-label={
+                                                        showPassword
+                                                            ? "Hide password"
+                                                            : "Show password"
+                                                    }
+                                                    className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground"
+                                                >
+                                                    {showPassword ? (
+                                                        <EyeOff className="h-4 w-4" />
+                                                    ) : (
+                                                        <Eye className="h-4 w-4" />
+                                                    )}
+                                                </button>
+                                            </div>
                                             {isInvalid && (
                                                 <FieldError
                                                     errors={
